@@ -35,3 +35,8 @@ type Cell struct {
 	Coor  *Coordinates
 	Value utils.CellValue
 }
+
+type ClickedCellRequest struct {
+	Coor  *Coordinates
+	Value utils.CellValue
+}

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var currentGame *entities.Game
+var CurrentGame *entities.Game
 
 func GetNewPlayer(name string) *entities.Player {
 	player := entities.Player{}
@@ -59,4 +59,18 @@ func PopulateRandomBoats() *entities.Board {
 	cell.Value = utils.CELLVALUE_BOAT
 
 	return board
+}
+
+func GetShotedCell(attacker *entities.Player, target *entities.Player, shot *entities.ClickedCellRequest) *entities.Cell {
+	shotted := &target.HomeTab.Cells[shot.Coor.X][shot.Coor.Y]
+	marker := &attacker.AttackTab.Cells[shot.Coor.X][shot.Coor.Y]
+
+	if shotted.Value == utils.CELLVALUE_BOAT {
+		shotted.Value = utils.CELLVALUE_DEAD
+		marker.Value = utils.CELLVALUE_DEAD
+	} else if shotted.Value == utils.CELLVALUE_WATER {
+		marker.Value = utils.CELLVALUE_WATER
+	}
+
+	return marker
 }

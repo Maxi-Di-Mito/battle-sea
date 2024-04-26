@@ -1,5 +1,5 @@
 {{block "index" .}}
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -7,6 +7,8 @@
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/static/main.css">
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <meta name="htmx-config" content='{"withCredentials":true}'>
 </head>
 
 <body>
@@ -24,6 +26,12 @@
     {{template "tab" .HomeTab}}
   </div>
   {{end}}
+  <script>
+    document.body.addEventListener('htmx:configRequest', function (evt) {
+      evt.detail.headers['player'] = document.location.pathname.replace('/', '')
+    });
+
+  </script>
 </body>
 
 </html>
@@ -46,9 +54,9 @@
 {{end}}
 
 {{define "cell"}}
-<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="none"
+<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML" hx-target="this"
   hx-include="find input[name='clicked']" {{end}}>
-  <input type="hidden" name="clicked" value="p1-{{.Coor.X}}-{{.Coor.Y}}-{{.Value}}">
+  <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
   {{.Value}}
 </div>
 {{end}}
