@@ -38,6 +38,7 @@ func main() {
 
 	server := echo.New()
 	server.Use(middleware.Logger())
+	server.Static("/static", "static")
 	server.Renderer = temps
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 

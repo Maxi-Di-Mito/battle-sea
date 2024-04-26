@@ -33,6 +33,5 @@ type Board struct {
 
 type Cell struct {
 	Coor  *Coordinates
-	Type  utils.CellType
-	Value string
+	Value utils.CellValue
 }

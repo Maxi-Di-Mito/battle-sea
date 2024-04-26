@@ -7,7 +7,6 @@
     integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/static/main.css">
-
 </head>
 
 <body>
@@ -17,21 +16,39 @@
   </header>
   {{end}}
 
-  {{block "tab" .PlayerOne}}
-  <div class="tab">
-    {{range .AttackTab.Cells}}
-    <div class="row">
-      {{range . }}
-      <div class="cell" hx-post="/click-cell" hx-swap="none" hx-include="input[name='p1-{{.Coor.X}}-{{.Coor.Y}}']">
-        <input type="hidden" name="p1-{{.Coor.X}}-{{.Coor.Y}}" value="{{.Value}}">
-        {{.Type}}
-      </div>
-      {{end}}
-    </div>
-    {{end}}
+  {{block "board" .}}
+  <div class="attackTab">
+    {{template "tab" .AttackTab}}
+  </div>
+  <div class="homeTab">
+    {{template "tab" .HomeTab}}
   </div>
   {{end}}
 </body>
 
 </html>
+{{end}}
+
+{{define "tab" }}
+<div class="tab">
+  {{range .Cells}}
+  {{template "row" .}}
+  {{end}}
+</div>
+{{end}}
+
+{{define "row" }}
+<div class="row">
+  {{range .}}
+  {{template "cell" .}}
+  {{end}}
+</div>
+{{end}}
+
+{{define "cell"}}
+<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="none"
+  hx-include="find input[name='clicked']" {{end}}>
+  <input type="hidden" name="clicked" value="p1-{{.Coor.X}}-{{.Coor.Y}}-{{.Value}}">
+  {{.Value}}
+</div>
 {{end}}

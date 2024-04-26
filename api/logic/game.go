@@ -3,6 +3,7 @@ package logic
 import (
 	"htmx-app/api/entities"
 	"htmx-app/utils"
+	"math/rand"
 
 	"github.com/google/uuid"
 )
@@ -14,7 +15,8 @@ func GetNewPlayer(name string) *entities.Player {
 
 	player.ID = uuid.New().String()
 	player.Name = name
-	player.AttackTab = PopulateBlankBoard()
+	player.AttackTab = PopulateBlankBoard(utils.CELLVALUE_UNKNOWN)
+	player.HomeTab = PopulateRandomBoats()
 
 	return &player
 }
@@ -28,7 +30,7 @@ func InitGame(p1 *entities.Player, p2 *entities.Player) *entities.Game {
 	return &game
 }
 
-func PopulateBlankBoard() *entities.Board {
+func PopulateBlankBoard(val utils.CellValue) *entities.Board {
 	board := entities.Board{Cells: [][]entities.Cell{}}
 
 	for x := 0; x < 10; x++ {
@@ -36,10 +38,25 @@ func PopulateBlankBoard() *entities.Board {
 		for y := 0; y < 10; y++ {
 			currentCell := &board.Cells[x][y]
 			currentCell.Coor = &entities.Coordinates{X: x, Y: y}
-			currentCell.Type = utils.CELLTYPE_WATER
-			currentCell.Value = "water"
+			currentCell.Value = val
 		}
 	}
 
 	return &board
+}
+
+func PopulateRandomBoats() *entities.Board {
+	board := PopulateBlankBoard(utils.CELLVALUE_WATER)
+
+	x := rand.Intn(10)
+	y := rand.Intn(10)
+	cell := &board.Cells[x][y]
+	cell.Value = utils.CELLVALUE_BOAT
+
+	x = rand.Intn(10)
+	y = rand.Intn(10)
+	cell = &board.Cells[x][y]
+	cell.Value = utils.CELLVALUE_BOAT
+
+	return board
 }

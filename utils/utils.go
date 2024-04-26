@@ -8,9 +8,10 @@ func ToLog(obj interface{}) string {
 	return string(data)
 }
 
-type CellType string
+type CellValue string
 
 const (
-	CELLTYPE_WATER CellType = "water"
-	CELLTYPE_BOAT  CellType = "boat"
+	CELLVALUE_WATER   CellValue = "water"
+	CELLVALUE_UNKNOWN CellValue = "unknown"
+	CELLVALUE_BOAT    CellValue = "boat"
 )
