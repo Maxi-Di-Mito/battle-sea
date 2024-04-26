@@ -1,27 +1,15 @@
 package main
 
 import (
-	"html/template"
-	"htmx-app/api/entities"
-	"htmx-app/api/logic"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	var tmpFile = "index.go.html"
-
-	tmpl, _ := template.New(tmpFile).ParseFiles(tmpFile)
-
-	w.Header().Add("Content-Type", "text/html")
-	tmpl.Execute(w, CurrentGame)
-
+func HomeHandler(ctx echo.Context) error {
+	return ctx.Render(http.StatusOK, "index", CurrentGame)
 }
 
-func StartGame(w http.ResponseWriter, r *http.Request) *entities.Game {
-	p1 := logic.GetNewPlayer("Maxi")
-	p2 := logic.GetNewPlayer("Cele")
+func ClickCell(w http.ResponseWriter, r *http.Request) {
 
-	game := logic.InitGame(p1, p2)
-
-	return game
 }

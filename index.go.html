@@ -1,3 +1,4 @@
+{{block "index" .}}
 <!DOCTYPE>
 <html>
 
@@ -16,12 +17,13 @@
   </header>
   {{end}}
 
-  {{block "tab" .}}
+  {{block "tab" .PlayerOne}}
   <div class="tab">
-    {{range .Tab.Cells}}
+    {{range .AttackTab.Cells}}
     <div class="row">
       {{range . }}
-      <div class="cell">
+      <div class="cell" hx-post="/click-cell" hx-swap="none" hx-include="input[name='p1-{{.Coor.X}}-{{.Coor.Y}}']">
+        <input type="hidden" name="p1-{{.Coor.X}}-{{.Coor.Y}}" value="{{.Value}}">
         {{.Type}}
       </div>
       {{end}}
@@ -32,3 +34,4 @@
 </body>
 
 </html>
+{{end}}
