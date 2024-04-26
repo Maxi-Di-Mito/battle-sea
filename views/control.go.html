@@ -1,0 +1,34 @@
+{{block "spec" .}}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/htmx.org@1.9.10"
+    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/static/main.css">
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <meta name="htmx-config" content='{"withCredentials":true}'>
+</head>
+
+<body>
+  {{template "header" .}}
+  <div class="spec-table">
+    <div class="one-tab">
+      {{template "board" .PlayerOne}}
+    </div>
+    <div class="two-tab">
+      {{template "board" .PlayerTwo}}
+    </div>
+  </div>
+
+  <script>
+    document.body.addEventListener('htmx:configRequest', function (evt) {
+      evt.detail.headers['player'] = document.location.pathname.replace('/', '')
+    });
+
+  </script>
+</body>
+
+</html>
+{{end}}

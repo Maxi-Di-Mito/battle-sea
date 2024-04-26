@@ -20,7 +20,7 @@ type Template struct {
 }
 
 var temps = &Template{
-	templates: template.Must(template.ParseGlob("*.go.html")),
+	templates: template.Must(template.ParseGlob("views/*.go.html")),
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
@@ -36,6 +36,7 @@ func main() {
 	server.Renderer = temps
 
 	server.GET("/:player", HomeHandler)
+	server.GET("/control", SpecHandler)
 	server.POST("/click-cell", ClickCellHandler)
 
 	p1 := logic.GetNewPlayer("Maxi")

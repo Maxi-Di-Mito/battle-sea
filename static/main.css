@@ -39,3 +39,8 @@ body {
 .cell.dead {
   background-color: red;
 }
+
+.spec-table {
+  display: flex;
+  gap: 1em;
+}

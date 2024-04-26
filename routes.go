@@ -26,6 +26,10 @@ func HomeHandler(ctx echo.Context) error {
 	return ctx.Render(http.StatusOK, "index", player)
 }
 
+func SpecHandler(ctx echo.Context) error {
+	return ctx.Render(http.StatusOK, "spec", logic.CurrentGame)
+}
+
 func ClickCellHandler(ctx echo.Context) error {
 	playerHeader := ctx.Request().Header.Get("player")
 
