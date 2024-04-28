@@ -1,39 +1,79 @@
 package main
 
 import (
-	"htmx-app/api/entities"
+	"fmt"
 	"htmx-app/api/logic"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 func HomeHandler(ctx echo.Context) error {
-	playerNumber := ctx.Param("player")
-	var player *entities.Player
-	if playerNumber == "1" {
-		player = logic.CurrentGame.PlayerOne
-	} else {
-		player = logic.CurrentGame.PlayerTwo
+	_, err := ctx.Cookie("playerId")
+	if err != nil {
+		cookie := new(http.Cookie)
+		cookie.Name = "playerId"
+		cookie.Value = uuid.New().String()
+		cookie.HttpOnly = true
+		ctx.SetCookie(cookie)
 	}
 
-	playerCookie := new(http.Cookie)
-	playerCookie.Name = "player"
-	playerCookie.Value = playerNumber
-	playerCookie.HttpOnly = true
-	ctx.SetCookie(playerCookie)
+	return ctx.Render(http.StatusOK, "home", logic.GameList)
+}
 
-	return ctx.Render(http.StatusOK, "index", player)
+func InitGameHandler(ctx echo.Context) error {
+	playerName := ctx.Request().Form.Get("name")
+	playerCookie, err := ctx.Cookie("playerId")
+	if err != nil {
+		fmt.Println("NO PLAYER ID")
+	}
+	playerId := playerCookie.Value
+
+	player := logic.GetNewPlayer(playerName, playerId)
+	game := logic.InitGame(player)
+
+	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
+
+	return ctx.String(http.StatusOK, "start")
+}
+
+func JoinGameHandler(ctx echo.Context) error {
+	playerName := ctx.Request().Form.Get("name")
+	gameId := ctx.Param("gameId")
+	playerCookie, err := ctx.Cookie("playerId")
+	if err != nil {
+		fmt.Println("NO PLAYER ID")
+	}
+	playerId := playerCookie.Value
+
+	player := logic.GetNewPlayer(playerName, playerId)
+	game := logic.FindGameById(gameId)
+
+	game.PlayerTwo = player
+
+	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
+
+	return ctx.String(http.StatusOK, "join")
+}
+
+func GameHandler(ctx echo.Context) error {
+	player := logic.GetPlayerFromCookie(ctx)
+
+	fmt.Println("EL PLAYER QUE SE UNE ----------------------")
+
+	return ctx.Render(http.StatusOK, "game", player)
 }
 
 func SpecHandler(ctx echo.Context) error {
-	return ctx.Render(http.StatusOK, "spec", logic.CurrentGame)
+	gameId := ctx.Param("game")
+	game := logic.FindGameById(gameId)
+	return ctx.Render(http.StatusOK, "spec", game)
 }
 
 func ClickCellHandler(ctx echo.Context) error {
-	playerHeader := ctx.Request().Header.Get("player")
-
-	attacker, target := logic.GetPlayersFromCookie(playerHeader)
+	attacker := logic.GetPlayerFromCookie(ctx)
+	target := logic.GetTargetFromCookie(ctx)
 	data := ctx.FormValue("clicked")
 	shot := logic.ParseClickedRequest(data)
 

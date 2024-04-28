@@ -2,35 +2,45 @@ package logic
 
 import (
 	"htmx-app/api/entities"
-	"htmx-app/utils"
 	"math/rand"
 
 	"github.com/google/uuid"
 )
 
-var CurrentGame *entities.Game
+var GameList []entities.Game
 
-func GetNewPlayer(name string) *entities.Player {
+func GetNewPlayer(name string, id string) *entities.Player {
 	player := entities.Player{}
 
-	player.ID = uuid.New().String()
+	player.ID = id
 	player.Name = name
-	player.AttackTab = PopulateBlankBoard(utils.CELLVALUE_UNKNOWN)
+	player.AttackTab = PopulateBlankBoard(entities.CELLVALUE_UNKNOWN)
 	player.HomeTab = PopulateRandomBoats()
 
 	return &player
 }
 
-func InitGame(p1 *entities.Player, p2 *entities.Player) *entities.Game {
+func InitGame(p1 *entities.Player) *entities.Game {
 	game := entities.Game{}
 
+	game.ID = uuid.New().String()
 	game.PlayerOne = p1
-	game.PlayerTwo = p2
+
+	GameList = append(GameList, game)
 
 	return &game
 }
 
-func PopulateBlankBoard(val utils.CellValue) *entities.Board {
+func FindGameById(id string) *entities.Game {
+	for idx, game := range GameList {
+		if game.ID == id {
+			return &GameList[idx]
+		}
+	}
+	return nil
+}
+
+func PopulateBlankBoard(val entities.CellValue) *entities.Board {
 	board := entities.Board{Cells: [][]entities.Cell{}}
 
 	for x := 0; x < 10; x++ {
@@ -46,17 +56,17 @@ func PopulateBlankBoard(val utils.CellValue) *entities.Board {
 }
 
 func PopulateRandomBoats() *entities.Board {
-	board := PopulateBlankBoard(utils.CELLVALUE_WATER)
+	board := PopulateBlankBoard(entities.CELLVALUE_WATER)
 
 	x := rand.Intn(10)
 	y := rand.Intn(10)
 	cell := &board.Cells[x][y]
-	cell.Value = utils.CELLVALUE_BOAT
+	cell.Value = entities.CELLVALUE_BOAT
 
 	x = rand.Intn(10)
 	y = rand.Intn(10)
 	cell = &board.Cells[x][y]
-	cell.Value = utils.CELLVALUE_BOAT
+	cell.Value = entities.CELLVALUE_BOAT
 
 	return board
 }
@@ -65,11 +75,11 @@ func GetShotedCell(attacker *entities.Player, target *entities.Player, shot *ent
 	shotted := &target.HomeTab.Cells[shot.Coor.X][shot.Coor.Y]
 	marker := &attacker.AttackTab.Cells[shot.Coor.X][shot.Coor.Y]
 
-	if shotted.Value == utils.CELLVALUE_BOAT {
-		shotted.Value = utils.CELLVALUE_DEAD
-		marker.Value = utils.CELLVALUE_DEAD
-	} else if shotted.Value == utils.CELLVALUE_WATER {
-		marker.Value = utils.CELLVALUE_WATER
+	if shotted.Value == entities.CELLVALUE_BOAT {
+		shotted.Value = entities.CELLVALUE_DEAD
+		marker.Value = entities.CELLVALUE_DEAD
+	} else if shotted.Value == entities.CELLVALUE_WATER {
+		marker.Value = entities.CELLVALUE_WATER
 	}
 
 	return marker

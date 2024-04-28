@@ -1,10 +1,10 @@
 package entities
 
-import "htmx-app/utils"
-
 type Game struct {
 	PlayerOne *Player
 	PlayerTwo *Player
+	Turn      *Player
+	ID        string
 }
 
 type Player struct {
@@ -33,10 +33,10 @@ type Board struct {
 
 type Cell struct {
 	Coor  *Coordinates
-	Value utils.CellValue
+	Value CellValue
 }
 
 type ClickedCellRequest struct {
 	Coor  *Coordinates
-	Value utils.CellValue
+	Value CellValue
 }

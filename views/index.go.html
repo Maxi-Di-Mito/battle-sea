@@ -1,14 +1,9 @@
-{{block "index" .}}
+{{block "home" .}}
 <!DOCTYPE html>
 <html>
 
 <head>
-  <script src="https://unpkg.com/htmx.org@1.9.10"
-    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
-    crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/static/main.css">
-  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-  <meta name="htmx-config" content='{"withCredentials":true}'>
+  {{template "head" .}}
 </head>
 
 <body>
@@ -18,45 +13,22 @@
   </header>
   {{end}}
 
-  {{block "board" .}}
-  <div class="attackTab">
-    {{template "tab" .AttackTab}}
-  </div>
-  <div class="homeTab">
-    {{template "tab" .HomeTab}}
-  </div>
+  {{block "game-list" .}}
+  <input type="text" name="name">
+  <form>
+    <ul>
+      {{range .}}
+      <li>
+        <p data-id="{{.ID}}">{{.ID}}</p>
+        <button hx-post="/join-game/{{.ID}}" hx-include="[name='name']">Join</button>
+      </li>
+      {{end}}
+    </ul>
+    <button hx-post="start-game" hx-include="[name='name']">Start new game</button>
+  </form>
   {{end}}
-  <script>
-    document.body.addEventListener('htmx:configRequest', function (evt) {
-      evt.detail.headers['player'] = document.location.pathname.replace('/', '')
-    });
 
-  </script>
 </body>
 
 </html>
-{{end}}
-
-{{define "tab" }}
-<div class="tab">
-  {{range .Cells}}
-  {{template "row" .}}
-  {{end}}
-</div>
-{{end}}
-
-{{define "row" }}
-<div class="row">
-  {{range .}}
-  {{template "cell" .}}
-  {{end}}
-</div>
-{{end}}
-
-{{define "cell"}}
-<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML" hx-target="this"
-  hx-include="find input[name='clicked']" {{end}}>
-  <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
-  {{.Value}}
-</div>
 {{end}}

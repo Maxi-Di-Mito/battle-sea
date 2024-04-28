@@ -1,0 +1,44 @@
+{{block "head" .}}
+<script src="https://unpkg.com/htmx.org@1.9.10"
+  integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/main.css">
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<meta name="htmx-config" content='{"withCredentials":true}'>
+{{end}}
+
+
+
+{{block "board" .}}
+<div class="attackTab">
+  {{template "tab" .AttackTab}}
+</div>
+<div class="homeTab">
+  {{template "tab" .HomeTab}}
+</div>
+{{end}}
+
+
+
+{{block "tab" .}}
+<div class="tab">
+  {{range .Cells}}
+  {{template "row" .}}
+  {{end}}
+</div>
+{{end}}
+
+{{block "row" .}}
+<div class="row">
+  {{range .}}
+  {{template "cell" .}}
+  {{end}}
+</div>
+{{end}}
+
+{{block "cell" .}}
+<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML" hx-target="this"
+  hx-include="find input[name='clicked']" {{end}}>
+  <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
+  {{.Value}}
+</div>
+{{end}}

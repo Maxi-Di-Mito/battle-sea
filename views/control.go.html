@@ -15,10 +15,14 @@
   {{template "header" .}}
   <div class="spec-table">
     <div class="one-tab">
+      {{if (ne .PlayerOne nil)}}
       {{template "board" .PlayerOne}}
+      {{end}}
     </div>
     <div class="two-tab">
+      {{if (ne .PlayerTwo nil)}}
       {{template "board" .PlayerTwo}}
+      {{end}}
     </div>
   </div>
 

@@ -2,30 +2,10 @@ package main
 
 import (
 	"fmt"
-	"html/template"
-	"htmx-app/api/logic"
-	"io"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"htmx-app/utils"
 )
-
-type Person struct {
-	Name string
-	Age  int
-}
-
-type Template struct {
-	templates *template.Template
-}
-
-var temps = &Template{
-	templates: template.Must(template.ParseGlob("views/*.go.html")),
-}
-
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
-}
 
 func main() {
 	// db.InitDb()
@@ -33,16 +13,17 @@ func main() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 	server.Static("/static", "static")
-	server.Renderer = temps
+	server.Renderer = utils.Temps
 
-	server.GET("/:player", HomeHandler)
-	server.GET("/control", SpecHandler)
+	server.GET("/", HomeHandler)
+
+	server.POST("/start-game", InitGameHandler)
+	server.POST("/join-game/:gameId", JoinGameHandler)
+
+	server.GET("/game/:id/player/:player", GameHandler)
 	server.POST("/click-cell", ClickCellHandler)
 
-	p1 := logic.GetNewPlayer("Maxi")
-	p2 := logic.GetNewPlayer("Cele")
-
-	logic.CurrentGame = logic.InitGame(p1, p2)
+	server.GET("/control/:game", SpecHandler)
 
 	server.Logger.Fatal(server.Start(":8765"))
 	fmt.Println("RUNNING on 8765")

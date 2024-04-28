@@ -1,6 +1,11 @@
 package utils
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/labstack/echo/v4"
+	"html/template"
+	"io"
+)
 
 func ToLog(obj interface{}) string {
 	data, _ := json.Marshal(&obj)
@@ -8,11 +13,14 @@ func ToLog(obj interface{}) string {
 	return string(data)
 }
 
-type CellValue string
+type Template struct {
+	templates *template.Template
+}
 
-const (
-	CELLVALUE_WATER   CellValue = "water"
-	CELLVALUE_UNKNOWN CellValue = "unknown"
-	CELLVALUE_BOAT    CellValue = "boat"
-	CELLVALUE_DEAD              = "dead"
-)
+var Temps = &Template{
+	templates: template.Must(template.ParseGlob("views/*.go.html")),
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
