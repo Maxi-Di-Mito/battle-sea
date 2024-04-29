@@ -52,6 +52,8 @@ func JoinGameHandler(ctx echo.Context) error {
 
 	game.PlayerTwo = player
 
+	game.PlayerOne.Turn = true
+
 	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
 
 	return ctx.String(http.StatusOK, "join")
@@ -59,8 +61,6 @@ func JoinGameHandler(ctx echo.Context) error {
 
 func GameHandler(ctx echo.Context) error {
 	player := logic.GetPlayerFromCookie(ctx)
-
-	fmt.Println("EL PLAYER QUE SE UNE ----------------------")
 
 	return ctx.Render(http.StatusOK, "game", player)
 }
@@ -78,6 +78,9 @@ func ClickCellHandler(ctx echo.Context) error {
 	shot := logic.ParseClickedRequest(data)
 
 	modifiedCell := logic.GetShotedCell(attacker, target, shot)
+
+	attacker.Turn = false
+	target.Turn = true
 
 	return ctx.Render(http.StatusOK, "cell", modifiedCell)
 }

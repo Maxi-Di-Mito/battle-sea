@@ -16,6 +16,7 @@ func GetNewPlayer(name string, id string) *entities.Player {
 	player.Name = name
 	player.AttackTab = PopulateBlankBoard(entities.CELLVALUE_UNKNOWN)
 	player.HomeTab = PopulateRandomBoats()
+	player.Turn = false
 
 	return &player
 }

@@ -13,6 +13,7 @@ type Player struct {
 	AttackTab *Board
 	HomeTab   *Board
 	Boats     []Boat
+	Turn      bool
 }
 
 type Boat struct {
