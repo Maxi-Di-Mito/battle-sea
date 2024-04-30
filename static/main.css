@@ -5,6 +5,10 @@ body {
   align-items: center;
 }
 
+.attackTab.disabled {
+  pointer-events: none;
+}
+
 .tab {
   display: grid;
   grid-template-rows: repeat(10, 1fr);
@@ -22,6 +26,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .cell.unknown {

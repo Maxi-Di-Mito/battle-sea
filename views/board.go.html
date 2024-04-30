@@ -9,7 +9,7 @@
 
 
 {{block "board" .}}
-<div class="attackTab {{if not .Turn }}disabled{{end}}">
+<div class="attackTab {{if eq .Turn false}}disabled{{end}}">
   {{template "tab" .AttackTab}}
 </div>
 <div class="homeTab">

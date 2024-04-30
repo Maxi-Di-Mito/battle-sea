@@ -25,6 +25,15 @@
       {{end}}
     </div>
   </div>
+  <pre>
+    {{ printf "%#v" . }}
+  </pre>
+  <pre>
+    {{ printf "%#v" .PlayerOne }}
+  </pre>
+  <pre>
+    {{ printf "%#v" .PlayerTwo }}
+  </pre>
 
   <script>
     document.body.addEventListener('htmx:configRequest', function (evt) {
