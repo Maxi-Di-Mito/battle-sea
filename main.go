@@ -18,9 +18,12 @@ func main() {
 	server.GET("/", HomeHandler)
 
 	server.POST("/start-game", InitGameHandler)
+	server.GET("/poll-oponent", PollForOponentHandler)
 	server.POST("/join-game/:gameId", JoinGameHandler)
 
+	// see your board
 	server.GET("/game/:id/player/:player", GameHandler)
+	// make a move
 	server.POST("/click-cell", ClickCellHandler)
 
 	server.GET("/control/:game", SpecHandler)

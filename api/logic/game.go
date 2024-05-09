@@ -1,10 +1,9 @@
 package logic
 
 import (
+	"github.com/google/uuid"
 	"htmx-app/api/entities"
 	"math/rand"
-
-	"github.com/google/uuid"
 )
 
 var GameList []entities.Game

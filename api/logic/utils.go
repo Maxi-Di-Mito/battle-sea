@@ -42,6 +42,33 @@ func GetPlayerFromCookie(ctx echo.Context) *entities.Player {
 	return nil
 }
 
+func GetStateForPlayerFromCookie(ctx echo.Context) *entities.BoardState {
+	playerCookie, err := ctx.Cookie("playerId")
+	if err != nil {
+		fmt.Println("NO PLAYER ID")
+	}
+	playerId := playerCookie.Value
+	fmt.Println("PLAYER ID PARA BUSCAR", playerId)
+
+	boardState := entities.BoardState{}
+
+	for _, game := range GameList {
+		if game.PlayerOne != nil && game.PlayerOne.ID == playerId {
+			boardState.Player = game.PlayerOne
+			boardState.Game = &game
+			boardState.Oponent = game.PlayerTwo
+			return &boardState
+		} else if game.PlayerTwo != nil && game.PlayerTwo.ID == playerId {
+			boardState.Player = game.PlayerTwo
+			boardState.Game = &game
+			boardState.Oponent = game.PlayerOne
+			return &boardState
+		}
+	}
+	return nil
+
+}
+
 func GetTargetFromCookie(ctx echo.Context) *entities.Player {
 	playerCookie, err := ctx.Cookie("playerId")
 	if err != nil {

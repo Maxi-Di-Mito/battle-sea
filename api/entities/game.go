@@ -41,3 +41,17 @@ type ClickedCellRequest struct {
 	Coor  *Coordinates
 	Value CellValue
 }
+
+type BoardState struct {
+	Player  *Player
+	Oponent *Player
+	Game    *Game
+}
+
+func (board *BoardState) IsActive() bool {
+	if board.Game.Turn == nil {
+		return false
+	} else {
+		return board.Player.ID == board.Game.Turn.ID
+	}
+}

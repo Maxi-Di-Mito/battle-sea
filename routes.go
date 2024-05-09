@@ -52,7 +52,7 @@ func JoinGameHandler(ctx echo.Context) error {
 
 	game.PlayerTwo = player
 
-	game.PlayerOne.Turn = true
+	game.Turn = game.PlayerOne
 
 	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
 
@@ -60,9 +60,21 @@ func JoinGameHandler(ctx echo.Context) error {
 }
 
 func GameHandler(ctx echo.Context) error {
-	player := logic.GetPlayerFromCookie(ctx)
+	boardState := logic.GetStateForPlayerFromCookie(ctx)
+	fmt.Println("ESTA ACTIVE", boardState.IsActive())
 
-	return ctx.Render(http.StatusOK, "game", player)
+	return ctx.Render(http.StatusOK, "game", boardState)
+}
+
+func PollForOponentHandler(ctx echo.Context) error {
+	boardState := logic.GetStateForPlayerFromCookie(ctx)
+
+	if boardState.Oponent == nil {
+		return ctx.String(http.StatusOK, "waiting")
+	} else {
+		ctx.Response().Header().Set("HX-Refresh", "true")
+		return ctx.String(http.StatusOK, "oponent joined")
+	}
 }
 
 func SpecHandler(ctx echo.Context) error {
@@ -72,15 +84,15 @@ func SpecHandler(ctx echo.Context) error {
 }
 
 func ClickCellHandler(ctx echo.Context) error {
-	attacker := logic.GetPlayerFromCookie(ctx)
-	target := logic.GetTargetFromCookie(ctx)
+	boardState := logic.GetStateForPlayerFromCookie(ctx)
+	attacker := boardState.Player
+	target := boardState.Oponent
 	data := ctx.FormValue("clicked")
 	shot := logic.ParseClickedRequest(data)
 
 	modifiedCell := logic.GetShotedCell(attacker, target, shot)
 
-	attacker.Turn = false
-	target.Turn = true
+	boardState.Game.Turn = target
 
 	return ctx.Render(http.StatusOK, "cell", modifiedCell)
 }

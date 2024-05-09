@@ -9,11 +9,11 @@
 
 
 {{block "board" .}}
-<div class="attackTab {{if eq .Turn false}}disabled{{end}}">
-  {{template "tab" .AttackTab}}
+<div class="attackTab {{if eq .IsActive false}}disabled{{end}}">
+  {{template "tab" .Player.AttackTab}}
 </div>
 <div class="homeTab">
-  {{template "tab" .HomeTab}}
+  {{template "tab" .Player.HomeTab}}
 </div>
 {{end}}
 
@@ -40,5 +40,18 @@
   hx-include="find input[name='clicked']" {{end}}>
   <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
   {{.Value}}
+</div>
+{{end}}
+
+
+{{block "wait-message" .}}
+<div class="message">
+  {{if eq .Oponent nil}}
+  <p>Waiting for an oponent</p>
+  <div style="display: none;" hx-get="/poll-oponent" hx-trigger="every 2s" hx-target="this" hx-swap="none"></div>
+  {{else if eq .IsActive false }}
+  <p>Waiting for oponent's move</p>
+  <div style="display: none;" hx-get="/poll-oponent" hx-trigger="every 2s" hx-target="this" hx-swap="none"></div>
+  {{end}}
 </div>
 {{end}}
