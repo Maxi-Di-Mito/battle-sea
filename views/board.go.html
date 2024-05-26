@@ -36,8 +36,8 @@
 {{end}}
 
 {{block "cell" .}}
-<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML" hx-target="this"
-  hx-include="find input[name='clicked']" {{end}}>
+<div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML"
+  hx-target="closest .tab" hx-include="find input[name='clicked']" {{end}}>
   <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
   {{.Value}}
 </div>
@@ -45,13 +45,15 @@
 
 
 {{block "wait-message" .}}
-<div class="message">
+<div id="message" class="message" hx-swap-oob="true">
   {{if eq .Oponent nil}}
   <p>Waiting for an oponent</p>
   <div style="display: none;" hx-get="/poll-oponent" hx-trigger="every 2s" hx-target="this" hx-swap="none"></div>
   {{else if eq .IsActive false }}
+  {{block "wait-move" .}}
   <p>Waiting for oponent's move</p>
   <div style="display: none;" hx-get="/poll-oponent" hx-trigger="every 2s" hx-target="this" hx-swap="none"></div>
+  {{end}}
   {{end}}
 </div>
 {{end}}

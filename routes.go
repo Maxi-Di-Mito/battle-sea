@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"htmx-app/api/logic"
-	"net/http"
-
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"htmx-app/api/logic"
+	"htmx-app/utils"
+	"net/http"
 )
 
 func HomeHandler(ctx echo.Context) error {
@@ -30,7 +31,7 @@ func InitGameHandler(ctx echo.Context) error {
 	}
 	playerId := playerCookie.Value
 
-	player := logic.GetNewPlayer(playerName, playerId)
+	player := logic.FindOrCreateNewPlayer(playerName, playerId)
 	game := logic.InitGame(player)
 
 	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
@@ -47,12 +48,13 @@ func JoinGameHandler(ctx echo.Context) error {
 	}
 	playerId := playerCookie.Value
 
-	player := logic.GetNewPlayer(playerName, playerId)
+	player := logic.FindOrCreateNewPlayer(playerName, playerId)
 	game := logic.FindGameById(gameId)
 
-	game.PlayerTwo = player
+	game.PlayerTwoId = player.ID
+	game.PlayerTwoTabs = logic.InitTabs()
 
-	game.Turn = game.PlayerOne
+	game.Turn = game.PlayerOneId
 
 	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
 
@@ -60,16 +62,34 @@ func JoinGameHandler(ctx echo.Context) error {
 }
 
 func GameHandler(ctx echo.Context) error {
-	boardState := logic.GetStateForPlayerFromCookie(ctx)
-	fmt.Println("ESTA ACTIVE", boardState.IsActive())
+	gameId := ctx.Param("id")
+	playerId := ctx.Param("player")
+	cookiePlayerId := logic.GetPlayerIdFromCookie(ctx)
+	if playerId != cookiePlayerId {
+		return ctx.Render(http.StatusForbidden, "error", "Player does not match game")
+	}
 
-	return ctx.Render(http.StatusOK, "game", boardState)
+	game, err := logic.FindGameAndValidate(gameId, playerId)
+	if err != nil {
+		ctx.Render(http.StatusNotFound, "error", err.Error())
+	}
+
+	player := logic.FindPlayerById(playerId)
+
+	data := logic.GetRenderGameData(game, player)
+
+	return ctx.Render(http.StatusOK, "game", data)
 }
 
 func PollForOponentHandler(ctx echo.Context) error {
-	boardState := logic.GetStateForPlayerFromCookie(ctx)
+	game, err := logic.FindGameAndValidate("id", "pId")
+	if err != nil {
+		return ctx.Render(http.StatusNotFound, "error", "No Game")
+	}
 
-	if boardState.Oponent == nil {
+	if game.IsReady() {
+		return ctx.String(http.StatusOK, "waiting")
+	} else if !boardState.IsActive() {
 		return ctx.String(http.StatusOK, "waiting")
 	} else {
 		ctx.Response().Header().Set("HX-Refresh", "true")
@@ -90,9 +110,14 @@ func ClickCellHandler(ctx echo.Context) error {
 	data := ctx.FormValue("clicked")
 	shot := logic.ParseClickedRequest(data)
 
-	modifiedCell := logic.GetShotedCell(attacker, target, shot)
+	logic.GetShotedCell(attacker, target, shot)
 
 	boardState.Game.Turn = target
 
-	return ctx.Render(http.StatusOK, "cell", modifiedCell)
+	buf := &bytes.Buffer{}
+
+	utils.Temps.Templates.ExecuteTemplate(buf, "board", boardState)
+	utils.Temps.Templates.ExecuteTemplate(buf, "wait-message", boardState)
+
+	return ctx.HTML(http.StatusOK, buf.String())
 }

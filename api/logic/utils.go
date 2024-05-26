@@ -2,11 +2,11 @@ package logic
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"htmx-app/api/entities"
+	"math/rand"
 	"strconv"
 	"strings"
-
-	"github.com/labstack/echo/v4"
 )
 
 func ParseClickedRequest(data string) *entities.ClickedCellRequest {
@@ -24,65 +24,52 @@ func ParseClickedRequest(data string) *entities.ClickedCellRequest {
 	return &entities.ClickedCellRequest{Coor: &entities.Coordinates{X: x, Y: y}}
 }
 
-func GetPlayerFromCookie(ctx echo.Context) *entities.Player {
+func GetPlayerIdFromCookie(ctx echo.Context) string {
 	playerCookie, err := ctx.Cookie("playerId")
 	if err != nil {
 		fmt.Println("NO PLAYER ID")
 	}
 	playerId := playerCookie.Value
-	fmt.Println("PLAYER ID PARA BUSCAR", playerId)
 
-	for _, game := range GameList {
-		if game.PlayerOne != nil && game.PlayerOne.ID == playerId {
-			return game.PlayerOne
-		} else if game.PlayerTwo != nil && game.PlayerTwo.ID == playerId {
-			return game.PlayerTwo
+	return playerId
+}
+
+func FindGameById(id string) *entities.Game {
+	for idx, game := range GameList {
+		if game.ID == id {
+			return &GameList[idx]
 		}
 	}
 	return nil
 }
 
-func GetStateForPlayerFromCookie(ctx echo.Context) *entities.BoardState {
-	playerCookie, err := ctx.Cookie("playerId")
-	if err != nil {
-		fmt.Println("NO PLAYER ID")
-	}
-	playerId := playerCookie.Value
-	fmt.Println("PLAYER ID PARA BUSCAR", playerId)
+func PopulateBlankBoard(val entities.CellValue) *entities.Board {
+	board := entities.Board{Cells: [][]entities.Cell{}}
 
-	boardState := entities.BoardState{}
-
-	for _, game := range GameList {
-		if game.PlayerOne != nil && game.PlayerOne.ID == playerId {
-			boardState.Player = game.PlayerOne
-			boardState.Game = &game
-			boardState.Oponent = game.PlayerTwo
-			return &boardState
-		} else if game.PlayerTwo != nil && game.PlayerTwo.ID == playerId {
-			boardState.Player = game.PlayerTwo
-			boardState.Game = &game
-			boardState.Oponent = game.PlayerOne
-			return &boardState
+	for x := 0; x < 10; x++ {
+		board.Cells = append(board.Cells, make([]entities.Cell, 10))
+		for y := 0; y < 10; y++ {
+			currentCell := &board.Cells[x][y]
+			currentCell.Coor = &entities.Coordinates{X: x, Y: y}
+			currentCell.Value = val
 		}
 	}
-	return nil
 
+	return &board
 }
 
-func GetTargetFromCookie(ctx echo.Context) *entities.Player {
-	playerCookie, err := ctx.Cookie("playerId")
-	if err != nil {
-		fmt.Println("NO PLAYER ID")
-	}
-	playerId := playerCookie.Value
-	fmt.Println("PLAYER ID PARA BUSCAR", playerId)
+func PopulateRandomBoats() *entities.Board {
+	board := PopulateBlankBoard(entities.CELLVALUE_WATER)
 
-	for _, game := range GameList {
-		if game.PlayerOne != nil && game.PlayerOne.ID == playerId {
-			return game.PlayerTwo
-		} else if game.PlayerTwo != nil && game.PlayerTwo.ID == playerId {
-			return game.PlayerOne
-		}
-	}
-	return nil
+	x := rand.Intn(10)
+	y := rand.Intn(10)
+	cell := &board.Cells[x][y]
+	cell.Value = entities.CELLVALUE_BOAT
+
+	x = rand.Intn(10)
+	y = rand.Intn(10)
+	cell = &board.Cells[x][y]
+	cell.Value = entities.CELLVALUE_BOAT
+
+	return board
 }

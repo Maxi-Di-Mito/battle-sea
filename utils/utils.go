@@ -14,13 +14,13 @@ func ToLog(obj interface{}) string {
 }
 
 type Template struct {
-	templates *template.Template
+	Templates *template.Template
 }
 
 var Temps = &Template{
-	templates: template.Must(template.ParseGlob("views/*.go.html")),
+	Templates: template.Must(template.ParseGlob("views/*.go.html")),
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+	return t.Templates.ExecuteTemplate(w, name, data)
 }

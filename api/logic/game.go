@@ -1,74 +1,33 @@
 package logic
 
 import (
-	"github.com/google/uuid"
+	"errors"
 	"htmx-app/api/entities"
-	"math/rand"
+
+	"github.com/google/uuid"
 )
 
 var GameList []entities.Game
-
-func GetNewPlayer(name string, id string) *entities.Player {
-	player := entities.Player{}
-
-	player.ID = id
-	player.Name = name
-	player.AttackTab = PopulateBlankBoard(entities.CELLVALUE_UNKNOWN)
-	player.HomeTab = PopulateRandomBoats()
-	player.Turn = false
-
-	return &player
-}
 
 func InitGame(p1 *entities.Player) *entities.Game {
 	game := entities.Game{}
 
 	game.ID = uuid.New().String()
-	game.PlayerOne = p1
+	game.PlayerOneId = p1.ID
+	game.PlayerOneTabs = InitTabs()
 
 	GameList = append(GameList, game)
 
 	return &game
 }
 
-func FindGameById(id string) *entities.Game {
-	for idx, game := range GameList {
-		if game.ID == id {
-			return &GameList[idx]
-		}
-	}
-	return nil
-}
+func InitTabs() *entities.GameTabs {
+	tabs := entities.GameTabs{}
 
-func PopulateBlankBoard(val entities.CellValue) *entities.Board {
-	board := entities.Board{Cells: [][]entities.Cell{}}
+	tabs.AttackTab = PopulateBlankBoard(entities.CELLVALUE_WATER)
+	tabs.HomeTab = PopulateRandomBoats()
 
-	for x := 0; x < 10; x++ {
-		board.Cells = append(board.Cells, make([]entities.Cell, 10))
-		for y := 0; y < 10; y++ {
-			currentCell := &board.Cells[x][y]
-			currentCell.Coor = &entities.Coordinates{X: x, Y: y}
-			currentCell.Value = val
-		}
-	}
-
-	return &board
-}
-
-func PopulateRandomBoats() *entities.Board {
-	board := PopulateBlankBoard(entities.CELLVALUE_WATER)
-
-	x := rand.Intn(10)
-	y := rand.Intn(10)
-	cell := &board.Cells[x][y]
-	cell.Value = entities.CELLVALUE_BOAT
-
-	x = rand.Intn(10)
-	y = rand.Intn(10)
-	cell = &board.Cells[x][y]
-	cell.Value = entities.CELLVALUE_BOAT
-
-	return board
+	return &tabs
 }
 
 func GetShotedCell(attacker *entities.Player, target *entities.Player, shot *entities.ClickedCellRequest) *entities.Cell {
@@ -83,4 +42,32 @@ func GetShotedCell(attacker *entities.Player, target *entities.Player, shot *ent
 	}
 
 	return marker
+}
+
+// Finds a game and validates that the player is on that game
+func FindGameAndValidate(gameId string, playerId string) (*entities.Game, error) {
+	game := FindGameById(gameId)
+	if game == nil {
+		return nil, errors.New("Game not found")
+	}
+
+	if game.PlayerOneId != playerId && game.PlayerTwoId != playerId {
+		return nil, errors.New("Game and Player do not match")
+	}
+
+	return game, nil
+}
+
+func GetRenderGameData(game *entities.Game, player *entities.Player) *entities.GameRenderData {
+	data := entities.GameRenderData{}
+	data.Game = game
+	if game.PlayerOneId == player.ID {
+		data.Tabs = game.PlayerOneTabs
+	} else {
+		data.Tabs = game.PlayerTwoTabs
+	}
+
+	data.IsActive = game.Turn == player.ID
+
+	return &data
 }

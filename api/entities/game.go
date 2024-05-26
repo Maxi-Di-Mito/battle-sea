@@ -1,19 +1,27 @@
 package entities
 
 type Game struct {
-	PlayerOne *Player
-	PlayerTwo *Player
-	Turn      *Player
-	ID        string
+	PlayerOneId   string
+	PlayerOneTabs *GameTabs
+	PlayerTwoId   string
+	PlayerTwoTabs *GameTabs
+	Turn          string
+	ID            string
 }
 
-type Player struct {
-	ID        string
-	Name      string
+func (game *Game) IsReady() bool {
+	return game.PlayerOneId != "" && game.PlayerTwoId != ""
+}
+
+type GameTabs struct {
 	AttackTab *Board
 	HomeTab   *Board
 	Boats     []Boat
-	Turn      bool
+}
+
+type Player struct {
+	ID   string
+	Name string
 }
 
 type Boat struct {
@@ -42,16 +50,9 @@ type ClickedCellRequest struct {
 	Value CellValue
 }
 
-type BoardState struct {
-	Player  *Player
-	Oponent *Player
-	Game    *Game
-}
-
-func (board *BoardState) IsActive() bool {
-	if board.Game.Turn == nil {
-		return false
-	} else {
-		return board.Player.ID == board.Game.Turn.ID
-	}
+// The data needed to render a game for a player
+type GameRenderData struct {
+	Game     *Game
+	Tabs     *GameTabs
+	IsActive bool
 }
