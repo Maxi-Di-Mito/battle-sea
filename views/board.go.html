@@ -10,10 +10,11 @@
 
 {{block "board" .}}
 <div class="attackTab {{if eq .IsActive false}}disabled{{end}}">
-  {{template "tab" .Player.AttackTab}}
+  {{template "tab" .Tabs.AttackTab}}
 </div>
+<br />
 <div class="homeTab">
-  {{template "tab" .Player.HomeTab}}
+  {{template "tab" .Tabs.HomeTab}}
 </div>
 {{end}}
 
@@ -37,7 +38,7 @@
 
 {{block "cell" .}}
 <div class="cell {{.Value}}" {{if eq .Value "unknown" }} hx-post="/click-cell" hx-swap="outerHTML"
-  hx-target="closest .tab" hx-include="find input[name='clicked']" {{end}}>
+  hx-include="find input[name='clicked']" {{end}}>
   <input type="hidden" name="clicked" value="{{.Coor.X}}-{{.Coor.Y}}">
   {{.Value}}
 </div>
@@ -46,7 +47,7 @@
 
 {{block "wait-message" .}}
 <div id="message" class="message" hx-swap-oob="true">
-  {{if eq .Oponent nil}}
+  {{if eq .Ready false}}
   <p>Waiting for an oponent</p>
   <div style="display: none;" hx-get="/poll-oponent" hx-trigger="every 2s" hx-target="this" hx-swap="none"></div>
   {{else if eq .IsActive false }}

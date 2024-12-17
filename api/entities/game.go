@@ -13,6 +13,14 @@ func (game *Game) IsReady() bool {
 	return game.PlayerOneId != "" && game.PlayerTwoId != ""
 }
 
+func (game *Game) OtherPlayerId(pId string) string {
+	if game.PlayerOneId == pId {
+		return game.PlayerTwoId
+	} else {
+		return game.PlayerOneId
+	}
+}
+
 type GameTabs struct {
 	AttackTab *Board
 	HomeTab   *Board
@@ -55,4 +63,5 @@ type GameRenderData struct {
 	Game     *Game
 	Tabs     *GameTabs
 	IsActive bool
+	Ready    bool
 }

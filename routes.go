@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"htmx-app/api/logic"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"htmx-app/api/logic"
-	"htmx-app/utils"
-	"net/http"
 )
 
 func HomeHandler(ctx echo.Context) error {
@@ -23,6 +22,7 @@ func HomeHandler(ctx echo.Context) error {
 	return ctx.Render(http.StatusOK, "home", logic.GameList)
 }
 
+// InitGameHandler creates a new game object. Set the game cookie for the player and redirects to the game path
 func InitGameHandler(ctx echo.Context) error {
 	playerName := ctx.Request().Form.Get("name")
 	playerCookie, err := ctx.Cookie("playerId")
@@ -36,6 +36,11 @@ func InitGameHandler(ctx echo.Context) error {
 
 	ctx.Response().Header().Set("HX-Location", fmt.Sprintf("/game/%s/player/%s", game.ID, player.ID))
 
+	cookie := new(http.Cookie)
+	cookie.Name = "gameId"
+	cookie.Value = game.ID
+	cookie.HttpOnly = true
+	ctx.SetCookie(cookie)
 	return ctx.String(http.StatusOK, "start")
 }
 
@@ -78,18 +83,18 @@ func GameHandler(ctx echo.Context) error {
 
 	data := logic.GetRenderGameData(game, player)
 
+	fmt.Printf("%v\n", data)
 	return ctx.Render(http.StatusOK, "game", data)
 }
 
 func PollForOponentHandler(ctx echo.Context) error {
-	game, err := logic.FindGameAndValidate("id", "pId")
+	pId := logic.GetPlayerIdFromCookie(ctx)
+	game, err := logic.FindGameAndValidate("id", pId)
 	if err != nil {
 		return ctx.Render(http.StatusNotFound, "error", "No Game")
 	}
 
-	if game.IsReady() {
-		return ctx.String(http.StatusOK, "waiting")
-	} else if !boardState.IsActive() {
+	if !game.IsReady() {
 		return ctx.String(http.StatusOK, "waiting")
 	} else {
 		ctx.Response().Header().Set("HX-Refresh", "true")
@@ -104,20 +109,16 @@ func SpecHandler(ctx echo.Context) error {
 }
 
 func ClickCellHandler(ctx echo.Context) error {
-	boardState := logic.GetStateForPlayerFromCookie(ctx)
-	attacker := boardState.Player
-	target := boardState.Oponent
+	gameId := logic.GetGameIdFromCookie(ctx)
+	game := logic.FindGameById(gameId)
+	pId := logic.GetPlayerIdFromCookie(ctx)
+	attacker, target := logic.GetAttackeAndTargetBoards(game, pId)
 	data := ctx.FormValue("clicked")
 	shot := logic.ParseClickedRequest(data)
 
-	logic.GetShotedCell(attacker, target, shot)
+	cell := logic.GetShotedCell(attacker, target, shot)
 
-	boardState.Game.Turn = target
+	game.Turn = game.OtherPlayerId(pId)
 
-	buf := &bytes.Buffer{}
-
-	utils.Temps.Templates.ExecuteTemplate(buf, "board", boardState)
-	utils.Temps.Templates.ExecuteTemplate(buf, "wait-message", boardState)
-
-	return ctx.HTML(http.StatusOK, buf.String())
+	return ctx.Render(http.StatusOK, "cell", cell)
 }

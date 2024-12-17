@@ -24,15 +24,15 @@ func InitGame(p1 *entities.Player) *entities.Game {
 func InitTabs() *entities.GameTabs {
 	tabs := entities.GameTabs{}
 
-	tabs.AttackTab = PopulateBlankBoard(entities.CELLVALUE_WATER)
+	tabs.AttackTab = PopulateBlankBoard(entities.CELLVALUE_UNKNOWN)
 	tabs.HomeTab = PopulateRandomBoats()
 
 	return &tabs
 }
 
-func GetShotedCell(attacker *entities.Player, target *entities.Player, shot *entities.ClickedCellRequest) *entities.Cell {
-	shotted := &target.HomeTab.Cells[shot.Coor.X][shot.Coor.Y]
-	marker := &attacker.AttackTab.Cells[shot.Coor.X][shot.Coor.Y]
+func GetShotedCell(attacker *entities.Board, target *entities.Board, shot *entities.ClickedCellRequest) *entities.Cell {
+	shotted := &target.Cells[shot.Coor.X][shot.Coor.Y]
+	marker := &attacker.Cells[shot.Coor.X][shot.Coor.Y]
 
 	if shotted.Value == entities.CELLVALUE_BOAT {
 		shotted.Value = entities.CELLVALUE_DEAD
@@ -68,6 +68,7 @@ func GetRenderGameData(game *entities.Game, player *entities.Player) *entities.G
 	}
 
 	data.IsActive = game.Turn == player.ID
+	data.Ready = game.PlayerTwoId != "" && game.PlayerOneId != ""
 
 	return &data
 }

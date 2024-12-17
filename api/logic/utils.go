@@ -34,6 +34,16 @@ func GetPlayerIdFromCookie(ctx echo.Context) string {
 	return playerId
 }
 
+func GetGameIdFromCookie(ctx echo.Context) string {
+	gameCookie, err := ctx.Cookie("gameId")
+	if err != nil {
+		fmt.Println("NO GAME ID")
+	}
+	gameId := gameCookie.Value
+
+	return gameId
+}
+
 func FindGameById(id string) *entities.Game {
 	for idx, game := range GameList {
 		if game.ID == id {
@@ -72,4 +82,12 @@ func PopulateRandomBoats() *entities.Board {
 	cell.Value = entities.CELLVALUE_BOAT
 
 	return board
+}
+
+func GetAttackeAndTargetBoards(game *entities.Game, pId string) (*entities.Board, *entities.Board) {
+	if game.PlayerOneId == pId {
+		return game.PlayerOneTabs.AttackTab, game.PlayerTwoTabs.HomeTab
+	} else {
+		return game.PlayerTwoTabs.AttackTab, game.PlayerOneTabs.HomeTab
+	}
 }
