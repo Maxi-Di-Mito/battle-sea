@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"htmx-app/utils"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"htmx-app/utils"
 )
 
 func main() {

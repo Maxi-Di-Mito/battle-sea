@@ -48,6 +48,12 @@ func JoinGameHandler(ctx echo.Context) error {
 	playerName := ctx.Request().Form.Get("name")
 	gameId := ctx.Param("gameId")
 	playerCookie, err := ctx.Cookie("playerId")
+
+	cookie := new(http.Cookie)
+	cookie.Name = "gameId"
+	cookie.Value = gameId
+	ctx.SetCookie(cookie)
+
 	if err != nil {
 		fmt.Println("NO PLAYER ID")
 	}
